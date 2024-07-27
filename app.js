@@ -32,7 +32,7 @@ async function main() {
 }
 
 // port coonection
-const port = 8080;
+const port = 8081;
 app.listen(port, () => {
   console.log(`A port start with ${port}.`);
 });
@@ -71,10 +71,6 @@ app.post(
   "/listings",
   validateListing,
   wrapAsync(async (req, res, next) => {
-    // let result=listingSchema.validate(req.body);
-    // if(result.error){
-    //   throw new ExpressError(400, result.error);
-    // }
     const newlisting = new Listing(req.body.listings);
     await newlisting.save();
     res.redirect("/listings");
