@@ -7,7 +7,8 @@ const method_override = require("method-override");
 const ejsMate = require("ejs-mate");
 const wrapAsync = require("./utils/wrapAsync.js");
 const ExpressError = require("./utils/ExpressError.js");
-const {listingSchema} = require("./schema.js");
+const Review = require("./models/review.js");
+const { listingSchema, reviewSchema } = require("./schema.js");
 
 //set and use
 app.set("view engine", "ejs");
@@ -52,6 +53,16 @@ const validateListing = (req, res, next) => {
   }
 };
 
+const validatReview = (req, res, next) => {
+  const { error } = reviewSchema.validate(req.body);
+  if (error) {
+    console.log(error);
+    throw new ExpressError(400, error);
+  } else {
+    next();
+  }
+};
+
 // Index Route
 app.get(
   "/listings",
@@ -82,7 +93,7 @@ app.get(
   "/listings/:id",
   wrapAsync(async (req, res) => {
     let { id } = req.params;
-    const listings = await Listing.findById(id);
+    const listings = await Listing.findById(id).populate("reviews");
     res.render("listings/show.ejs", { listings });
   })
 );
@@ -120,6 +131,38 @@ app.delete(
     let { id } = req.params;
     const value = await Listing.findByIdAndDelete(id);
     res.redirect("/listings");
+  })
+);
+
+// review route
+app.post(
+  "/listings/:id/reviews",
+  validatReview,
+  wrapAsync(async (req, res, next) => {
+    let { id } = req.params;
+    let listing = await Listing.findById(req.params.id);
+    let newrev = new Review(req.body.review);
+
+    listing.reviews.push(newrev);
+
+    await newrev.save();
+    await listing.save();
+
+    console.log("new review saved");
+    res.redirect(`/listings/${id}`);
+  })
+);
+
+// Delete reviews Route
+app.delete(
+  "/listings/:id/reviews/:reviewId",
+  wrapAsync(async (req, res) => {
+    let { id, reviewId } = req.params;
+
+    await Listing.findByIdAndUpdate(id, { $pull: { reviews: reviewId } });
+    await Review.findByIdAndDelete(reviewId);
+
+    res.redirect(`/listings/${id}`);
   })
 );
 
