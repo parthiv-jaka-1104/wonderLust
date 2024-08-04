@@ -3,7 +3,7 @@ const router = express.Router();
 const wrapAsync = require("../utils/wrapAsync.js");
 const Listing = require("../models/listing.js");
 const ExpressError = require("../utils/ExpressError.js");
-const { listingSchema, reviewSchema } = require("../schema.js");
+const { listingSchema } = require("../schema.js");
 
 const validateListing = (req, res, next) => {
   const { error } = listingSchema.validate(req.body);
@@ -29,17 +29,6 @@ router.get("/new", (req, res) => {
   res.render("listings/new.ejs");
 });
 
-// add items
-router.post(
-  "/",
-  validateListing,
-  wrapAsync(async (req, res, next) => {
-    const newlisting = new Listing(req.body.listing);
-    await newlisting.save();
-    res.redirect("/listings");
-  })
-);
-
 // Show route
 router.get(
   "/:id",
@@ -47,6 +36,18 @@ router.get(
     let { id } = req.params;
     const listings = await Listing.findById(id).populate("reviews");
     res.render("listings/show.ejs", { listings });
+  })
+);
+
+// add items
+router.post(
+  "/",
+  validateListing,
+  wrapAsync(async (req, res, next) => {
+    const newlisting = new Listing(req.body.listing);
+    await newlisting.save();
+    req.flash("parthiv","new Item added");
+    res.redirect("/listings");
   })
 );
 
@@ -67,8 +68,9 @@ router.put(
   wrapAsync(async (req, res) => {
     let { id } = req.params;
     await Listing.findByIdAndUpdate(id, {
-      ...req.body.listings,
+      ...req.body.listing,
     });
+    req.flash("parthiv","Item Updated");
     res.redirect(`/listings/${id}`);
   })
 );
@@ -78,7 +80,10 @@ router.delete(
   " /:id",
   wrapAsync(async (req, res) => {
     let { id } = req.params;
-    const value = await Listing.findByIdAndDelete(id);
+    console.log(id);
+    let value = await Listing.findByIdAndDelete(id);
+    console.log(value);
+    req.flash("parthiv","Item id Deleted");
     res.redirect("/listings");
   })
 );

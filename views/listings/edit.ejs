@@ -1,4 +1,4 @@
-<% layout("/layouts/boilerplate") %>
+`<% layout("/layouts/boilerplate") %>
   <div class="row mt-3">
     <div class="col-8 offset-2">
       <h3>Edit your Listing</h3>
@@ -10,7 +10,7 @@
             class="form-control"
             id="title"
             value="<%= listings.title %>"
-            name="listings[title]"
+            name="listing[title]"
             required
           />
           <div class="valid-feedback">Title Looks Good !</div>
@@ -19,7 +19,7 @@
         <div class="mb-3">
           <label for="description" class="form-label">Description: </label>
           <textarea
-            name="listings[description]"
+            name="listing[description]"
             class="form-control"
             id="description"
             cols="15"
@@ -33,7 +33,7 @@
 
         <div class="mb-3">
           <label for="image" class="form-label">Image: </label>
-          <input type="text" name="listings[image]" value="<%= listings.image %>
+          <input type="text" name="listing[image]" value="<%= listings.image %>"
           id="image" class="form-control" required/>
           <div class="invalid-feedback">Please Enter Valid URL</div>
         </div>
@@ -42,7 +42,7 @@
           <div class="mb-3 col-md-4">
             <label for="price" class="form-label">Price: </label>
             <input
-              name="listings[price]"
+              name="listing[price]"
               value="<%= listings.price %>"
               type="number"
               id="price"
@@ -56,7 +56,7 @@
             <label for="country" class="form-label">Country: </label>
             <input
               type="text"
-              name="listings[country]"
+              name="listing[country]"
               value="<%=
                 listings.country %>"
               id="country"
@@ -70,7 +70,7 @@
           <label for="location" class="form-label">Location: </label>
           <input
             type="text"
-            name="listings[location]"
+            name="listing[location]"
             id="location"
             class="form-control"
             value="<%= listings.location %>"
@@ -85,3 +85,4 @@
 
 
 
+`

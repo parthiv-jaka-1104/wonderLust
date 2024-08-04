@@ -1,25 +1,17 @@
 const express = require("express");
 const app = express();
 const mongoose = require("mongoose");
-const Listing = require("./models/listing.js");
 const path = require("path");
 const method_override = require("method-override");
 const ejsMate = require("ejs-mate");
-const wrapAsync = require("./utils/wrapAsync.js");
 const ExpressError = require("./utils/ExpressError.js");
-const Review = require("./models/review.js");
-const { listingSchema, reviewSchema } = require("./schema.js");
+const session = require("express-session");
+const flash = require("connect-flash");
 
 const listings = require("./routes/listing.js");
+const reviews = require("./routes/review.js");
 
-//set and use
-app.set("view engine", "ejs");
-app.set("views", path.join(__dirname, "views"));
-app.use(express.urlencoded({ extended: true }));
-app.use(method_override("_method"));
-app.engine("ejs", ejsMate);
-app.use(express.static(path.join(__dirname, "/public")));
-app.use("/listings", listings);
+
 
 //Databse connection
 
@@ -35,58 +27,47 @@ async function main() {
   await mongoose.connect("mongodb://127.0.0.1:27017/wanderlust");
 }
 
+//set and use
+app.set("view engine", "ejs");
+app.set("views", path.join(__dirname, "views"));
+app.use(express.urlencoded({ extended: true }));
+app.use(method_override("_method"));
+app.engine("ejs", ejsMate);
+app.use(express.static(path.join(__dirname, "/public")));
+
 // port coonection
-const port = 8081;
+const port = 8080;
 app.listen(port, () => {
   console.log(`A port start with ${port}.`);
 });
+
+//session
+const sessionOptions = {
+  secret: "mysupersecreatString",
+  resave: false,
+  saveUninitialized: true,
+  cookie: {
+    expires: Date.now() + 7 * 24 * 60 * 60 * 1000,
+    maxAge: 7 * 24 * 60 * 60 * 1000,
+    // httpOnly: true,
+  },
+};
 
 // Url
 app.get("/", (req, res) => {
   res.send("This is a root");
 });
 
-const validatReview = (req, res, next) => {
-  const { error } = reviewSchema.validate(req.body);
-  if (error) {
-    console.log(error);
-    throw new ExpressError(400, error);
-  } else {
-    next();
-  }
-};
+app.use(session(sessionOptions));
+app.use(flash());
 
-// review route
-app.post(
-  "/listings/:id/reviews",
-  validatReview,
-  wrapAsync(async (req, res, next) => {
-    let { id } = req.params;
-    let listing = await Listing.findById(req.params.id);
-    let newrev = new Review(req.body.review);
+app.use((req, res, next) => {
+  res.locals.parthiv = req.flash("parthiv");
+  next();
+});
 
-    listing.reviews.push(newrev);
-
-    await newrev.save();
-    await listing.save();
-
-    console.log("new review saved");
-    res.redirect(`/listings/${id}`);
-  })
-);
-
-// Delete reviews Route
-app.delete(
-  "/listings/:id/reviews/:reviewId",
-  wrapAsync(async (req, res) => {
-    let { id, reviewId } = req.params;
-
-    await Listing.findByIdAndUpdate(id, { $pull: { reviews: reviewId } });
-    await Review.findByIdAndDelete(reviewId);
-
-    res.redirect(`/listings/${id}`);
-  })
-);
+app.use("/listings", listings);
+app.use("/listings/:id/reviews", reviews);
 
 //
 app.all("*", (req, res, next) => {
