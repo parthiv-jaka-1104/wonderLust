@@ -5,6 +5,9 @@ const Listing = require("../models/listing.js");
 const ExpressError = require("../utils/ExpressError.js");
 const { listingSchema } = require("../schema.js");
 
+// const method_override = require("method-override");
+// router.use(method_override("_method"));
+
 const validateListing = (req, res, next) => {
   const { error } = listingSchema.validate(req.body);
   if (error) {
@@ -82,9 +85,8 @@ router.delete(
     let { id } = req.params;
     console.log(id);
     let value = await Listing.findByIdAndDelete(id);
-    console.log(value);
-    req.flash("parthiv","Item id Deleted");
-    res.redirect("/listings");
+    // req.flash("parthiv","Item id Deleted");
+    res.redirect("");
   })
 );
 

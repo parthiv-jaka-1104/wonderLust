@@ -14,7 +14,6 @@ const reviews = require("./routes/review.js");
 
 
 //Databse connection
-
 main()
   .then((res) => {
     console.log("connection succefull");

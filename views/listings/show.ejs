@@ -29,7 +29,7 @@
       class="btn btn-dark col-1 offset-3 new-btn"
       >Edit</a
     >
-    <form method="post" action="/listings/<%= listings._id %>?_method=DELETE">
+    <form method="POST" action="/listings/<%= listings._id %>?_method=DELETE">
       <button class="btn btn-dark offset-5 new-btn">Delete</button>
     </form>
   </div>
@@ -80,7 +80,7 @@
           <form
             method="POST"
             class="mb-3"
-            action="/listings/<%= listings._id %>?_method=DELETE"
+            action="/listings/<%= listings._id %>/reviews/<%= review._id%>?_method=DELETE"
           >
             <button class="btn btn-dark offset-5 new-btn">Delete</button>
           </form>
